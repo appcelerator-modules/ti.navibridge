@@ -1,19 +1,7 @@
-/*
- * We'll follow a really simple paradigm in this example app. It's going to be a hierarchy of tables where you can drill
- * in to individual examples for each ACS namespace.
- *
- * To facilitate that, we will have a collection of "windowFunctions" like the "Users" window, and the "Login" window.
- *
- * These are defined in the "windows" folder and its children.
- *
- * That's it! Enjoy.
- */
-
 var NAVIBRIDGE = require('ti.navibridge');
 NAVIBRIDGE.SetApplicationID('ICiAV4Ay');
 
 var win = Ti.UI.createWindow({ title : "navibridge" });
-win.add(table);
 
 var topView = Ti.UI.createView({});
  
@@ -26,7 +14,7 @@ var naviView = Ti.UI.createView({ top: 0, height: 600 });
 				color: 'black',
 				text:"v" + Titanium.App.getVersion() + " ",
 				font: {fontSize: 6}
-		});//end versionLabel
+		});//end versionLabel	
 		naviView.add( versionLabel );
 		
 		//and the trigger button
@@ -41,8 +29,6 @@ var naviView = Ti.UI.createView({ top: 0, height: 600 });
 		var InsertPOIButton = Ti.UI.createButton({ top:95, title:'Insert POI', height:40, width:200 });
 		InsertPOIButton.addEventListener('click', function(){ NAVIBRIDGE.addPOI({ lat:37.38922, lon:-122.048496});  });
 		naviView.add( InsertPOIButton );
-		
-		naviView.add( InsertPOIArrayButton );
 		
 		//add the console
 		var console = Ti.UI.createLabel({
@@ -71,4 +57,3 @@ var naviView = Ti.UI.createView({ top: 0, height: 600 });
 	
 	win.add( topView );
 win.open();
-
