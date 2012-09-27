@@ -4,7 +4,7 @@ var NAVIBRIDGE = (function() {
   	var API = {};
   	API.isIOS = (Ti.Platform.osname === 'iphone' || Ti.Platform.osname ==='ipad' )? true : false;
 	
-  	API.ApplicationID = "tjKEEUqB";//"DEADBEEF";
+  	API.ApplicationID = "tjKEEUqB";//"DEADBEEF";ICiAV4Ay
   	API.ver = "1.4";
   	
   	API.URLschemeBASE = "navicon://"; //fb://<insert function here>"
@@ -232,7 +232,3 @@ var NAVIBRIDGE = (function() {
 })(); //end NAVIBRIDGE
 
 module.exports = NAVIBRIDGE;
-
-
-
-
