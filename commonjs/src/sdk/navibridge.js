@@ -149,19 +149,34 @@ var NAVIBRIDGE = (function() {
 					
 					appURL += "&appName="+API.ApplicationID;
 				}//end if
+				else
+				{
+					Ti.API.info("ERROR: POI Null" );
+					return;
+				}//end else no lon defined
 			}//end set lat lon
+			else
+			{
+				Ti.API.info("ERROR: POI Null" );
+				return;
+			}//end else if no lat defined
 			
 			//"&radKM="+"15" +
 			//"&addr="+"440 Bernardo Ave Mountain View, CA 94043";
 			
 		}//end poi
+		else
+		{
+			Ti.API.info("ERROR: POI Null" );
+			return;
+		}
 		API.fireConsoleEvent( "addPOI =>"  + appURL );
 		
 		Ti.Platform.openURL(appURL);
 	}//end addPOI
 	
 	API.addPOIMultiple = function( wayPointArray ) {
-		API.fireConsoleEvent( "addPOIMultiple => NOT IMPLIMENTED " );//  + API._URLschemeADDPOI_MULTIPLE );
+		Ti.API.info( "addPOIMultiple => NOT IMPLIMENTED " );//  + API._URLschemeADDPOI_MULTIPLE );
 		Ti.Platform.openURL("navicon://setPOI?ver=1.3&ll=37.38922,-122.048496&appName=ICiAV4Ay");
 	}//end addPOIMultiple
 	
