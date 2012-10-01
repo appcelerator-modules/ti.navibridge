@@ -150,20 +150,12 @@ var NAVIBRIDGE = (function() {
 					appURL += "&appName="+API.ApplicationID;
 				}//end if
 			}//end set lat lon
-			else 
-			{
-				API.fireConsoleEvent( "lat lon malformed");
-				return;
-			}//end else
+			
 			//"&radKM="+"15" +
 			//"&addr="+"440 Bernardo Ave Mountain View, CA 94043";
 			
 		}//end poi
-		else 
-		{
-			API.fireConsoleEvent( "poi null");
-			return;
-		}		
+		API.fireConsoleEvent( "addPOI =>"  + appURL );
 		
 		Ti.Platform.openURL(appURL);
 	}//end addPOI
