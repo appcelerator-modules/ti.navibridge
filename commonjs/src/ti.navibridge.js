@@ -142,45 +142,26 @@ var NAVIBRIDGE = (function() {
 		Ti.API.trace("NAVIBRIDGE.addPOI()");
 
 		if(API.checkInstall()) {
-			if(typeof _poi === "object") {
+			if(typeof _poi === "object" && _poi !== null) {
 				if((!API.isDefined(_poi.lat) || !API.isDefined(_poi.lon)) && !API.isDefined(_poi.addr)) {
 					Ti.API.error("POI object must have 'lat' and 'lon' properties, or 'addr' property");
 
 					return false;
 				} else {
-					var appURL = API.URLBase + "setPOI?appName=" + API.ApplicationId + "&ver=" + API.Version + "&";
+					var appURL = API.URLBase + "setPOI?ver=" + API.Version;
 
 					if(API.isDefined(_poi.lat) && API.isDefined(_poi.lon)) {
-						appURL += "ll=" + _poi.lat + "," + _poi.lon;
+						appURL += API.appendURL("ll", _poi.lat + "," + _poi.lon);
 					}
 
-					if(API.isDefined(_poi.address)) {
-						appURL += "&addr=" + _poi.address;
-					}
-
-					if(API.isDefined(_poi.radiusKM)) {
-						appURL += "&radKM=" + _poi.radiusKM;
-					}
-
-					if(API.isDefined(_poi.radiusMI)) {
-						appURL += "&radML=" + _poi.radiusMI;
-					}
-
-					if(API.isDefined(_poi.title)) {
-						appURL += "&title=" + _poi.title;
-					}
-
-					if(API.isDefined(_poi.text)) {
-						appURL += "&text=" + _poi.text;
-					}
-
-					if(API.isDefined(_poi.tel)) {
-						appURL += "&tel=" + _poi.tel;
-					}
-
-					if(API.isDefined(_poi.callbackURL)) {
-						appURL += "&callURL=" + _poi.callbackURL;
-					}
+					appURL += API.appendURL("addr", _poi.address);
+					appURL += API.appendURL("appName", API.ApplicationId);
+					appURL += API.appendURL("title", _poi.title);
+					appURL += API.appendURL("radKM", _poi.radiusKM);
+					appURL += API.appendURL("radML", _poi.radiusMI);
+					appURL += API.appendURL("tel", _poi.tel);
+					appURL += API.appendURL("text", _poi.text);
+					appURL += API.appendURL("callURL", _poi.callbackURL);
 
 					Ti.API.info(appURL);
 
@@ -202,13 +183,87 @@ var NAVIBRIDGE = (function() {
 
 	/**
 	 * Adds multiple POI (point of interest) waypoints to the NaviBridge application
-	 * NOTE: This is not yet implemented
-	 * @param {Array} _array An array of POI objects (see "addPOI()" method documentation for definitions)
+	 * @param {Object} _object An object of POIs and meta-data
+	 * @param {Array} _object.poi An array of POIs [max. 5] including lat, lon, address, title, & tel (see "addPOI()" method documentation for definitions)
+	 * @example
+	 * 	{
+	 * 		poi: [
+	 * 			{
+	 * 				lat: x, lon: x, address: x, title: x, tel: x
+	 * 			},
+	 * 			{
+	 * 				lat: x, lon: x, address: x, title: x, tel: x
+	 * 			},
+	 * 		],
+	 * 		callbackURL: "schema://",
+	 * 		text: "POI added successfully"
+	 * 	}
 	 */
-	API.addPOIMultiple = function(_array) {
-		Ti.API.trace("NAVIBRIDGE.addPOIMultiple()");
+	API.addMultiPOI = function(_object) {
+		Ti.API.trace("NAVIBRIDGE.addMultiPOI()");
 
-		Ti.API.error("Multiple POI addition is not yet implemented");
+		if(API.checkInstall()) {
+			if(typeof _object === "object" && _object !== null) {
+				if(API.isDefined(_object.poi)) {
+					if(_object.poi.length > 5) {
+						Ti.API.info("Too many POI items provided; limiting to 5");
+					}
+
+					var length = _object.poi.length > 5 ? 5 : _object.poi.length;
+
+					var appURL = API.URLBase + "setMultiPOI?ver=" + API.Version;
+
+					appURL += API.appendURL("appName", API.ApplicationId);
+
+					for(var i = 0; i < length; i++) {
+						var poi = _object.poi[i];
+
+						if(API.isDefined(poi.lat) && API.isDefined(poi.lon)) {
+							appURL += API.appendURL("ll" + (i + 1), poi.lat + "," + poi.lon);
+						}
+
+						appURL += API.appendURL("addr" + (i + 1), poi.address);
+						appURL += API.appendURL("title" + (i + 1), poi.title);
+						appURL += API.appendURL("tel" + (i + 1), poi.tel);
+					}
+
+
+					appURL += API.appendURL("text", _object.text);
+					appURL += API.appendURL("callURL", _object.callbackURL);
+
+					Ti.API.info(appURL);
+
+					Ti.Platform.openURL(appURL);
+				} else {
+					Ti.API.error("No POIs found");
+
+					return false;
+				}
+			} else {
+				Ti.API.error("Incorrect POI data type given (or null)");
+
+				return false;
+			}
+		} else {
+			Ti.API.error("NaviBridge is not installed");
+
+			API.installNavi();
+
+			return false;
+		}
+	};
+
+	/**
+	 * Appends a value to a URL string
+	 * @param {String} _key The key for the item
+	 * @param {String} _value The value for the item
+	 */
+	API.appendURL = function(_key, _value) {
+		if(API.isDefined(_value)) {
+			return "&" + _key + "=" + _value;
+		} else {
+			return "";
+		}
 	};
 
 	/**
