@@ -19,7 +19,7 @@ var NAVIBRIDGE = (function() {
 
 	/** Do not modify these values */
 	var API = {
-		Version: "1.4",
+		Version: "1.3",
 		URLBase: "navicon://",
 		Install: {
 			iOS: "http://itunes.apple.com/us/app/navibridge/id498898448?mt=8",
