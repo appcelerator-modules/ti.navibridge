@@ -9,7 +9,7 @@
  *		US:
  *			Register: http://www.globaldenso.com/en/products/aftermarket/navibridge/index.html
  *
- * All coordinates must be passed to NaviBridge as a decimal. NaviBridge uses the WGS84 datium with the following range limitations:
+ * All coordinates must be passed to NaviBridge as a decimal. NaviBridge uses the WGS84 datum with the following range limitations:
  *		-90.0 < lat < 90.0
  *		-180.0 <= lng <= 180.0
  */
