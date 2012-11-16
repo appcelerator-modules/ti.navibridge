@@ -1,0 +1,7 @@
+tmp
+/.settings/
+/.project
+*/build/
+.DS_Store
+build.log
+commonjs/src/ti.navibridge.js
