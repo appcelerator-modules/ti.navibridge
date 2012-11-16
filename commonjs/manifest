@@ -2,9 +2,9 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 1.0.2
-description: Appcelerator Cloud Services
-author: Dawson Toth and Jeff English
+version: 1.0.3
+description: Denso NaviBridge
+author: Matt Schmulen and Matthew Congrove
 license: Appcelerator Commercial License
 copyright: Copyright (c) 2011-2012 by Appcelerator,  Inc.
 
