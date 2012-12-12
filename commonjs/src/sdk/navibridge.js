@@ -88,13 +88,11 @@ var NAVIBRIDGE = (function() {
 	API.openNavi = function() {
 		Ti.API.trace(LCAT + " NAVIBRIDGE.openNavi()");
 
-		if(API.checkInstall()) {
-			Ti.Platform.openURL(API.URLBase);
-		} else {
-			Ti.API.error(LCAT + " NaviBridge is not installed");
-
-			API.installNavi();
+		if (!naviAppInstalled()) {
+			return;
 		}
+		
+		openURL(API.URLBase);
 	};
 
 	/**
@@ -103,10 +101,10 @@ var NAVIBRIDGE = (function() {
 	API.checkInstall = function() {
 		Ti.API.trace(LCAT + " NAVIBRIDGE.checkInstall()");
 
-		if(Ti.Platform.canOpenURL(API.URLBase)) {
-			return true;
+		if (API.Platform === 'android') {
+			Ti.API.error(LCAT + " NAVIBRIDGE.checkInstall() is iOS only")
 		} else {
-			return false;
+			return Ti.Platform.canOpenURL(API.URLBase);
 		}
 	};
 
@@ -115,53 +113,8 @@ var NAVIBRIDGE = (function() {
 	 */
 	API.installNavi = function() {
 		Ti.API.trace(LCAT + " NAVIBRIDGE.installNavi()");
-		
-		if(API.Enabled) {
-			if(!API.checkInstall()) {
-				var alertDialog = Ti.UI.createAlertDialog({
-					title: "NaviBridge Not Installed",
-					message: "This action requires you install the NaviBridge application",
-					buttonNames: [ "OK", "Cancel" ],
-					cancel: 1
-				});
-	
-				alertDialog.addEventListener("click", function(_event) {
-					if(_event.index === 0) {
-						var installURL;
-	
-						switch(API.Platform) {
-							case "ios":
-								installURL = API.Install.iOS;
-								break;
-							case "android":
-								installURL = API.Install.Android;
-								break;
-							case "mobileweb":
-								Ti.API.error(LCAT + " NaviBridge not available for mobile web");
-								return;
-								break;
-							default:
-								Ti.API.error(LCAT + " NaviBridge is not supported on this platform " + API.Platform);
-								break;
-						}
-	
-						Ti.API.info(LCAT + " Installing NaviBridge application");
-	
-						Ti.Platform.openURL(installURL);
-					} else {
-						Ti.API.info(LCAT + " User aborted NaviBridge installation");
-						
-						API.Enabled = false;
-					}
-				});
-	
-				alertDialog.show();
-			} else {
-				Ti.API.info(LCAT + " NaviBridge is already installed");
-			}
-		} else {
-			Ti.API.info(LCAT + " User already declined NaviBridge install");
-		}
+
+		installNaviApp();
 	};
 
 	/**
@@ -186,42 +139,38 @@ var NAVIBRIDGE = (function() {
 			
 			return false;
 		}
+		
+		if (!naviAppInstalled()) {
+			return false;
+		}
 
-		if(API.checkInstall()) {
-			if(typeof _poi === "object" && _poi !== null) {
-				if((!isDefined(_poi.lat) || !isDefined(_poi.lon)) && !isDefined(_poi.addr)) {
-					Ti.API.error(LCAT + " POI object must have 'lat' and 'lon' properties, or 'addr' property");
-
-					return false;
-				} else {
-					var appURL = API.URLBase + "setPOI?ver=" + API.Version;
-
-					if(isDefined(_poi.lat) && isDefined(_poi.lon)) {
-						appURL += appendURL("ll", _poi.lat + "," + _poi.lon);
-					}
-
-					appURL += appendURL("addr", _poi.address);
-					appURL += appendURL("appName", API.ApplicationId);
-					appURL += appendURL("title", _poi.title);
-					appURL += appendURL("radKM", _poi.radiusKM);
-					appURL += appendURL("radML", _poi.radiusMI);
-					appURL += appendURL("tel", _poi.tel);
-					appURL += appendURL("text", _poi.text);
-					appURL += appendURL("callURL", _poi.callbackURL);
-
-					Ti.API.info(LCAT + " " + appURL);
-
-					Ti.Platform.openURL(appURL);
-				}
-			} else {
-				Ti.API.error(LCAT + " Incorrect POI data type given (or null)");
+		if(typeof _poi === "object" && _poi !== null) {
+			if((!isDefined(_poi.lat) || !isDefined(_poi.lon)) && !isDefined(_poi.addr)) {
+				Ti.API.error(LCAT + " POI object must have 'lat' and 'lon' properties, or 'addr' property");
 
 				return false;
+			} else {
+				var appURL = API.URLBase + "setPOI?ver=" + API.Version;
+
+				if(isDefined(_poi.lat) && isDefined(_poi.lon)) {
+					appURL += appendURL("ll", _poi.lat + "," + _poi.lon);
+				}
+
+				appURL += appendURL("addr", _poi.address);
+				appURL += appendURL("appName", API.ApplicationId);
+				appURL += appendURL("title", _poi.title);
+				appURL += appendURL("radKM", _poi.radiusKM);
+				appURL += appendURL("radML", _poi.radiusMI);
+				appURL += appendURL("tel", _poi.tel);
+				appURL += appendURL("text", _poi.text);
+				appURL += appendURL("callURL", _poi.callbackURL);
+
+				Ti.API.info(LCAT + " " + appURL);
+
+				openURL(appURL);
 			}
 		} else {
-			Ti.API.error(LCAT + " NaviBridge is not installed");
-
-			API.installNavi();
+			Ti.API.error(LCAT + " Incorrect POI data type given (or null)");
 
 			return false;
 		}
@@ -257,57 +206,142 @@ var NAVIBRIDGE = (function() {
 			return false;
 		}
 
-		if(API.checkInstall()) {
-			if(typeof _object === "object" && _object !== null) {
-				if(isDefined(_object.poi)) {
-					if(_object.poi.length > 5) {
-						Ti.API.info(LCAT + " Too many POI items provided; limiting to 5");
-					}
-
-					var length = _object.poi.length > 5 ? 5 : _object.poi.length;
-
-					var appURL = API.URLBase + "setMultiPOI?ver=" + API.Version;
-
-					appURL += appendURL("appName", API.ApplicationId);
-
-					var poi;
-					for(var i = 0; i < length; i++) {
-						poi = _object.poi[i];
-
-						if(isDefined(poi.lat) && isDefined(poi.lon)) {
-							appURL += appendURL("ll" + (i + 1), poi.lat + "," + poi.lon);
-						}
-
-						appURL += appendURL("addr" + (i + 1), poi.address);
-						appURL += appendURL("title" + (i + 1), poi.title);
-						appURL += appendURL("tel" + (i + 1), poi.tel);
-					}
-
-
-					appURL += appendURL("text", _object.text);
-					appURL += appendURL("callURL", _object.callbackURL);
-
-					Ti.API.info(LCAT + " " + appURL);
-
-					Ti.Platform.openURL(appURL);
-				} else {
-					Ti.API.error(LCAT + " No POIs found");
-
-					return false;
+		if (!naviAppInstalled()) {
+			return false;
+		}
+		
+		if(typeof _object === "object" && _object !== null) {
+			if(isDefined(_object.poi)) {
+				if(_object.poi.length > 5) {
+					Ti.API.info(LCAT + " Too many POI items provided; limiting to 5");
 				}
+
+				var length = _object.poi.length > 5 ? 5 : _object.poi.length;
+
+				var appURL = API.URLBase + "setMultiPOI?ver=" + API.Version;
+
+				appURL += appendURL("appName", API.ApplicationId);
+
+				var poi;
+				for(var i = 0; i < length; i++) {
+					poi = _object.poi[i];
+
+					if(isDefined(poi.lat) && isDefined(poi.lon)) {
+						appURL += appendURL("ll" + (i + 1), poi.lat + "," + poi.lon);
+					}
+
+					appURL += appendURL("addr" + (i + 1), poi.address);
+					appURL += appendURL("title" + (i + 1), poi.title);
+					appURL += appendURL("tel" + (i + 1), poi.tel);
+				}
+
+
+				appURL += appendURL("text", _object.text);
+				appURL += appendURL("callURL", _object.callbackURL);
+
+				Ti.API.info(LCAT + " " + appURL);
+
+				openURL(appURL);
 			} else {
-				Ti.API.error(LCAT + " Incorrect POI data type given (or null)");
+				Ti.API.error(LCAT + " No POIs found");
 
 				return false;
 			}
 		} else {
-			Ti.API.error(LCAT + " NaviBridge is not installed");
-
-			API.installNavi();
+			Ti.API.error(LCAT + " Incorrect POI data type given (or null)");
 
 			return false;
 		}
 	};
+	
+	/**
+	 * Opens a given url
+	 * @param {String} _url The URL to be opened
+	 */
+	var openURL = function(_url) {
+		switch(API.Platform) {
+			case "ios":
+				Ti.Platform.openURL(_url);
+				break;
+			case "android":
+				var success = Ti.Platform.openURL(_url);
+				if (!success) {
+					installNaviApp();
+				}
+				break;
+			case "mobileweb":
+				Ti.API.error(LCAT + " NaviBridge not available for mobile web");
+				break;
+			default:
+				Ti.API.error(LCAT + " NaviBridge is not supported on this platform " + API.Platform);
+				break;
+		}
+	}
+	
+	/**
+	 * Checks if NaviBridge App is installed
+	 * Returns true on Android without checking
+	 * @return {Bool} Returns true if app installed or running on android, false if app not installed
+	 */
+	var naviAppInstalled = function() {
+		// Android does not support Ti.Platform.canOpenURL()
+		// We must assume the app is installed on Android and catch if it is not installed when calling openURL()
+		if (API.Platform === 'android' || Ti.Platform.canOpenURL(API.URLBase)) {
+			// is Android or Navibridge App is installed
+			return true;
+		} else {
+			installNaviApp();
+			return false;
+		}
+	}
+
+	/**
+	 * Promps the user to install the NaviBridge application on their device
+	 */
+	var installNaviApp = function() {
+		if(API.Enabled) {			
+			var alertDialog = Ti.UI.createAlertDialog({
+				title: "NaviBridge",
+				message: "This action requires you install the NaviBridge application",
+				buttonNames: [ "OK", "Cancel" ],
+				cancel: 1
+			});
+
+			alertDialog.addEventListener("click", function(_event) {
+				if(_event.index === 0) {
+					var installURL;
+
+					switch(API.Platform) {
+						case "ios":
+							installURL = API.Install.iOS;
+							break;
+						case "android":
+							installURL = API.Install.Android;
+							break;
+						case "mobileweb":
+							Ti.API.error(LCAT + " NaviBridge not available for mobile web");
+							return;
+							break;
+						default:
+							Ti.API.error(LCAT + " NaviBridge is not supported on this platform " + API.Platform);
+							break;
+					}
+
+					Ti.API.info(LCAT + " Installing NaviBridge application");
+
+					Ti.Platform.openURL(installURL);
+				} else {
+					Ti.API.info(LCAT + " User aborted NaviBridge installation");
+					
+					API.Enabled = false;
+				}
+			});
+
+			alertDialog.show();
+		} else {
+			Ti.API.info(LCAT + " User already declined NaviBridge install");
+		}
+	}
 
 	/**
 	 * Appends a value to a URL string
