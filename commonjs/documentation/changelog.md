@@ -1,5 +1,7 @@
 # Change Log
 <pre>
+v1.0.4  [MOD-1075] Adding support for Android
+	
 v1.0.3  [MOD-1017] Improved documentation and example app. Adding _setNaviBridgeInstallAppURL_ method. 
 
 v1.0.2  Adding support for NaviBridge 3.30
